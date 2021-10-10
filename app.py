@@ -1,5 +1,5 @@
 from re import I
-from worddata_Excel_tabiF_FC import create_word_TF,check_genre
+from worddata_Excel import create_word,check_genre
 from flask import Flask, render_template, redirect, url_for,request,g
 
 #from models.models import db, MemberList #class名
@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
 from sqlalchemy.dialects import postgresql
 from flask.globals import session
-import worddata_Excel_tabiF_FC #自作関数
+import worddata_Excel #自作関数
 
 app = Flask(__name__)
 app.secret_key = 'yokoyama' # secret key
@@ -264,41 +264,41 @@ def odai_warifuri():
          #### エクセルファイルからワードを引っ張ってくる処理（これも親だけ実施する処理）
         genre_number = int(request.form.get('genre_num'))
         print("genre-->",genre_number) 
-        [word_data,qest_data] = create_word_TF(genre_number) #wordデータをエクセルから生成
-        #word_num = random.randint(0,len(word_data)-1) #ランダムにワードデータを一つ選択
-        print("qest_data---->",qest_data)
+        [word_data,word_max_row_num] = create_word(genre_number) #wordデータをエクセルから生成 ###変更ポイント
+        word_num = random.randint(0,len(word_data)-1) #ランダムにワードデータを一つ選択
+    
 
         OtherVari = db2.session.query(OtherVar).all()
-        OtherVari[0].word_num = 0 #使用しない
+        OtherVari[0].word_num = word_num #使用しない
         OtherVari[0].global_ulfnum = global_ulfnum ####危険なくすべき
         OtherVari[0].wolf_number = ulfnum
-        OtherVari[0].word_ulf = word_data[0] #ウルフのときのお題
-        OtherVari[0].word_shimin = word_data[1] #市民のときのお題
+        OtherVari[0].word_ulf = word_data[word_num][0] #ウルフのときのお題
+        OtherVari[0].word_shimin = word_data[word_num][1] #市民のときのお題
 
-        if qest_data[0] is None:
+        if word_data[word_num][2] is None:
             OtherVari[0].quest1 = "" #質問１
         else:
-            OtherVari[0].quest1 = qest_data[0] #質問１
+            OtherVari[0].quest1 = word_data[word_num][2] #質問１
 
-        if qest_data[1]  is None:
+        if word_data[word_num][3]  is None:
             OtherVari[0].quest2 = "" #質問2
         else:
-            OtherVari[0].quest2 = qest_data[1] #質問2
+            OtherVari[0].quest2 = word_data[word_num][3] #質問2
 
-        if  qest_data[2] is None:
+        if  word_data[word_num][4]  is None:
             OtherVari[0].quest3 = "" #質問3
         else:
-            OtherVari[0].quest3 = qest_data[2] #質問3
+            OtherVari[0].quest3 =  word_data[word_num][4] #質問3
 
-        if  qest_data[3] is None:
+        #if  qest_data[3] is None:
             OtherVari[0].quest4 = "" #質問4
-        else:
-            OtherVari[0].quest4 = qest_data[3] #質問4
+        #else:
+        #    OtherVari[0].quest4 = qest_data[3] #質問4
 
-        if  qest_data[4] is None:
+        #if  qest_data[4] is None:
             OtherVari[0].quest5 = "" #質問5
-        else:
-            OtherVari[0].quest5 = qest_data[4] #質問5
+        #else:
+        #    OtherVari[0].quest5 = qest_data[4] #質問5
 
         db2.session.commit()
     
